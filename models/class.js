@@ -1,34 +1,30 @@
 module.exports=(sequelize, DataTypes)=>{
     const Class=sequelize.define("Class",{
-        classId:{
-            type: DataTypes.INTEGER,
-            allowNull:false,
-            autoIncrement:true,
-            primaryKey:true
-        },
         classCode:{
             type:DataTypes.STRING,
-            allowNull:false
+            allowNull:false,
+            unique:true,
+            validate: {
+                notEmpty: true
+              }
         },
         className:{
             type:DataTypes.STRING,
-            allowNull:false
+            allowNull:false,
+            validate: {
+                notEmpty: true
+              }
         }
     });
 
     Class.associate=models=>{
-        Class.belongsToMany(models.Teacher,{
-            through:'teachers_subjects',
-            // foreignKey:'classId'
-            // onDelete:'cascade'
-        });
-
         Class.belongsToMany(models.Student,{
             through:'teachers_subjects',
-            // foreignKey:'classId'
-            // onDelete:'cascade'
+            as: '',
+            foreignKey: ''
+            
         });
     };
-
+    
     return Class;
 };

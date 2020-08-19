@@ -27,14 +27,21 @@ exports.getId= async (req, res) => {
     try {
       let results = await db.Teacher.findAll({
         where: {
-          id: req.params.id
+          teacherId: req.params.id
         }
       })
       res.status(200).send(results);
-      logger.log({
-        level: 'info',
-        message: 'Get - based on id'
-      });
+      if(results!=0){
+        logger.log({
+          level: 'info',
+          message: 'Get - based on id'
+        });
+      }else{
+        logger.log({
+          level: 'error',
+          message: 'Get/id - id not found'
+        });
+      }
     }
     catch (err) {
       errorLogger.log({
@@ -50,37 +57,40 @@ exports.getId= async (req, res) => {
     try {
       let results = await db.Teacher.findAndCountAll({})
       res.status(200).send(results)
-      logger.log({
-        level: 'info',
-        message: 'GET - all'
-      });
+      if(results!=0){
+        logger.log({
+          level: 'info',
+          message: 'GET - all'
+        });
+      }else{
+        logger.log({
+          level: 'error',
+          message: 'GET/all - no entry in database'
+        });
+      }
     }
     catch (err) {
       res.status(400).json({ message: "Error" })
     }
   };
 
-  exports.uploadById= async (req, res) => {
+  exports.newEntry= async (req, res) => {
     try {
-      let results = db.Teacher.create({
-        teacherId:'6',
-        teacherEmail: "Yaacob.K@moe.gov.sg",
-        teacherName: "Yaacob Kassim",
+      let results = await db.Teacher.create({
+        teacherEmail: "tan.k.k@moe.gov.sg",
+        teacherName: "Tan Kah Khee",
         toDelete: '1'
       },
         db.Class.create({
-          classId:'8',
-          className:'Data Science',
-          classCode:'ENG101'
+          className:'Computational Algorithm',
+          classCode:'ENG231'
         }, 
           db.Subject.create({
-          subjectId:'7',
-          subjectCode:'EE43',
-          subjectName:'Electrical Motors'
+          subjectCode:'CSS13',
+          subjectName:'Introduction to Electronics'
         }))
-      )
-      res.status(200).json(results)
-      .send({ message: "Successfully Updated" })
+      );
+      res.status(200).json(results).send({ message: "Successfully Updated" });
       logger.log({
         level: 'info',
         message: 'Updated id'
@@ -100,6 +110,10 @@ exports.getId= async (req, res) => {
         }
       })
       res.status(200).json(results);
+      logger.log({
+        level: 'info',
+        message: 'DELETE/id '
+      })
     }
     catch (err) {
      return   res.status(400).json({ message: "Error" })
@@ -111,19 +125,20 @@ exports.getId= async (req, res) => {
     try {
       let results = await db.Student.findAndCountAll({
         where: {
-          classCode: req.query.class
+          classCode: req.query.classCode
         },
         attributes: [
-          "id",
+          "id", 
           "studentName",
           "studentEmail",
         ]
       },
-        {
+        { 
           offset: req.query.offset,
           limit: req.query.limit,
   
-        })
+        }
+        )
       data = {};
       data.count = results.count;
       data.students = results.rows;
@@ -155,40 +170,35 @@ const storage = multer.diskStorage({
   });
 
   exports.uploadFile= async (req, res, next) => {
-    let results = fs.createReadStream(req.file.path).pipe(csv({}))
-      .on('data', (data) => {
+    fs.createReadStream(req.file.path).pipe(csv({}))
+      .on('data', async (data) => {
         try {
-          db.Teacher.create({
+          let results= await db.Teacher.create({
             teacherEmail: data.teacherEmail,
             teacherName: data.teacherName,
             toDelete: data.toDelete
-          },
-            db.Student.create({
-              studentName:data.studentName,
-              studentEmail:data.studentEmail
-            },
-              db.Subject.create({
-                subjectCode:data.subjectCode,
-                sujectName:data.sujectName
-              },
-                db.Class.create({
-                  classCode:data.classCode,
-                  className:data.className
-                })
-              )
-            )
-          )
-        } catch (err) {
-          res.status(400).send({
-            message: "Error!"
-          })
+          }, db.Student.create({
+            studentName: data.studentName,
+            studentEmail: data.studentEmail
+          }, db.Subject.create({
+            subjectCode: data.subjectCode,
+            subjectName: data.subjectName
+          }, db.Class.create({
+            classCode: data.classCode,
+            className: data.className
+          }))));
+        }
+        catch (err) {
+          res.status(400).send({message: "Error!"});
         }
       })
       .on('end', () => {
       });
-    // console.log(req.file);
     res.status(200).send("File Uploaded!");
-  
+      logger.log({
+        level: 'info',
+        message: 'File Uploaded!'
+      });
   };
 
   //Question 3
@@ -226,13 +236,14 @@ const storage = multer.diskStorage({
   //Question 4
 exports.getReport= async (req, res) => {
     try {
-      let results = await db.Admin.findAll({
+      let results = await db.Teacher.findAll({
         attributes: [
-            "subjectCode",
-            "studentName",
-            "classCode",
-          ]
+            "teacherName"
+          ],
+          include:[db.Subject]
       })
+      // data = {};
+      // data.teacher=results;
       res.status(200).json(results);
   
     } catch (err) {

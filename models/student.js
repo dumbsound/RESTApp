@@ -1,26 +1,29 @@
 module.exports=(sequelize, DataTypes)=>{
     const Student=sequelize.define("Student",{
-        studentId:{
-            type: DataTypes.INTEGER,
-            allowNull:false,
-            autoIncrement:true,
-            primaryKey:true
-        },
         studentName:{
             type:DataTypes.STRING,
-            allowNull:false
+            allowNull:false,
+            validate: {
+                notEmpty: true
+              }
         },
         studentEmail:{
             type:DataTypes.STRING,
-            allowNull:false
+            allowNull:false,
+            unique:true,
+            validate: {
+                notEmpty: true,
+                isEmail:true
+              }
         }
     });
 
-    const Categories=Student.associate = models=>{
+    Student.associate = models=>{
         Student.belongsToMany(models.Class,{
-            through: 'student_classes',
-            foreignKey: 'studentId',
-            // onDelete:"cascade"
+            through:'student_subjects',
+            as: '',
+            foreignKey: 'studentId'
+           
         })
     };
 

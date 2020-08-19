@@ -21,12 +21,11 @@ router.get('/upload/:id',posts.getId);
 
 router.get('/all', posts.getAll);
 
-// router.put("/upload/:id", posts.uploadById);
-router.post("/upload", posts.uploadById);
+router.post("/upload/new", posts.newEntry);
 
 router.delete("/upload/:id", posts.delete);
 
-router.get('/students', posts.studentData);
+router.get('/class/:classCode', posts.studentData);
 
 router.post('/upload', upload.single('file'), posts.uploadFile);
 

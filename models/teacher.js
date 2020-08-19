@@ -1,38 +1,38 @@
 module.exports=(sequelize, DataTypes)=>{
     const Teacher=sequelize.define("Teacher",{
-        teacherId:{
-            type: DataTypes.INTEGER,
-            allowNull:false,
-            autoIncrement:true,
-            primaryKey:true
-        },
         teacherName:{
             type:DataTypes.STRING,
-            allowNull:false
+            allowNull:false,
+            validate: {
+                notEmpty: true
+              }
         },
         teacherEmail:{
             type:DataTypes.STRING,
-            allowNull:false
+            allowNull:false,
+            unique:true,
+            validate: {
+                notEmpty: true,
+                isEmail:true
+              }
         },
         toDelete:{
             type:DataTypes.STRING,
-            allowNull:false
+            allowNull:false,
+            validate: {
+                notEmpty: true
+              }
         }
     });
 
     Teacher.associate=models=>{
         Teacher.belongsToMany(models.Class,{
-            through:'teachers_classes',
-            foreignKey:'teacherId',
-            // onDelete:'cascade'
-        });
-
-        Teacher.belongsToMany(models.Subject,{
-            through:'teachers_subjects',
-            foreignKey:'teacherId',
-            // onDelete:'cascade'
+            through:'classTeachers',
+            as: '' ,
+            foreignKey: 'teacherId'
         });
     };
 
     return Teacher;
+    
 };
