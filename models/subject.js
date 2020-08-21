@@ -1,5 +1,5 @@
 module.exports=(sequelize, DataTypes)=>{
-    const Subject=sequelize.define("Subject",{
+    const Subject=sequelize.define('Subject',{
         subjectCode:{
             type:DataTypes.STRING,
             allowNull:false,
@@ -18,10 +18,10 @@ module.exports=(sequelize, DataTypes)=>{
     });
 
     Subject.associate=models=>{
-        Subject.belongsToMany(models.Teacher,{
-            through:'teachers_subjects',
-            as: '',
-            foreignKey: 'subjectId'
+        models.Subject.belongsToMany(models.Teacher,{
+            through:'subject_Teacher',
+            as:'subjectTeacher',
+
         });
     };
 

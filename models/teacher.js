@@ -1,5 +1,5 @@
 module.exports=(sequelize, DataTypes)=>{
-    const Teacher=sequelize.define("Teacher",{
+    const Teacher=sequelize.define('Teacher',{
         teacherName:{
             type:DataTypes.STRING,
             allowNull:false,
@@ -26,10 +26,10 @@ module.exports=(sequelize, DataTypes)=>{
     });
 
     Teacher.associate=models=>{
-        Teacher.belongsToMany(models.Class,{
-            through:'classTeachers',
-            as: '' ,
-            foreignKey: 'teacherId'
+        models.Teacher.belongsToMany(models.Class,{
+            through: models.class_Teacher,
+            as:'class',
+            foreignKey:'teacherId'
         });
     };
 

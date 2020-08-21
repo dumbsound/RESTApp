@@ -4,6 +4,7 @@ const multer = require('multer');
 const fs = require('fs');
 const csv = require('csv-parser');
 const external=require('./external');
+const class_Teacher = require("../models/class_Teacher");
 
 const logger = winston.createLogger({
     transports: [
@@ -18,10 +19,6 @@ const logger = winston.createLogger({
       new winston.transports.File({ filename: 'error.log' })
     ]
   });
-
-exports.run = async(req,res)=>{
-    res.status(200).json({message:'Testing! Controller Module'})
-}
 
 exports.getId= async (req, res) => {
     try {
@@ -50,12 +47,12 @@ exports.getId= async (req, res) => {
       });
         return res.status(400).json({message:"ID not found"})
     }
-    
   };
 
   exports.getAll= async (req, res) => {
     try {
-      let results = await db.Teacher.findAndCountAll({})
+      let results = await db.Teacher.findAndCountAll({
+      })
       res.status(200).send(results)
       if(results!=0){
         logger.log({
@@ -99,7 +96,6 @@ exports.getId= async (req, res) => {
     catch (err) {
         res.status(500);
     }
-    
   };
 
   exports.delete = async (req, res) => {
@@ -120,7 +116,6 @@ exports.getId= async (req, res) => {
     }
   };
 
-  //Question 2
   exports.studentData= async (req, res) => {
     try {
       let results = await db.Student.findAndCountAll({
@@ -136,7 +131,6 @@ exports.getId= async (req, res) => {
         { 
           offset: req.query.offset,
           limit: req.query.limit,
-  
         }
         )
       data = {};
@@ -169,28 +163,28 @@ const storage = multer.diskStorage({
     }
   });
 
+
   exports.uploadFile= async (req, res, next) => {
     fs.createReadStream(req.file.path).pipe(csv({}))
       .on('data', async (data) => {
-        try {
+        
           let results= await db.Teacher.create({
             teacherEmail: data.teacherEmail,
             teacherName: data.teacherName,
             toDelete: data.toDelete
-          }, db.Student.create({
+          },
+             db.Student.create({
             studentName: data.studentName,
             studentEmail: data.studentEmail
-          }, db.Subject.create({
+          }, 
+            db.Subject.create({
             subjectCode: data.subjectCode,
             subjectName: data.subjectName
-          }, db.Class.create({
+          }, 
+            db.Class.create({
             classCode: data.classCode,
             className: data.className
-          }))));
-        }
-        catch (err) {
-          res.status(400).send({message: "Error!"});
-        }
+          }))))
       })
       .on('end', () => {
       });
@@ -201,7 +195,6 @@ const storage = multer.diskStorage({
       });
   };
 
-  //Question 3
  exports.updateClassName= async (req, res) => {
     try {
       let results = await db.Class.update({
@@ -233,17 +226,15 @@ const storage = multer.diskStorage({
     }
   };
 
-  //Question 4
 exports.getReport= async (req, res) => {
     try {
       let results = await db.Teacher.findAll({
         attributes: [
             "teacherName"
           ],
-          include:[db.Subject]
+          include:[{Subject}]
       })
-      // data = {};
-      // data.teacher=results;
+      
       res.status(200).json(results);
   
     } catch (err) {
